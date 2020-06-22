@@ -2,7 +2,7 @@
 
 require 'pg'
 
-def help()
+def help
   puts <<~HELP
   An expense recording system
   
@@ -16,7 +16,7 @@ def help()
   HELP
 end
 
-def list()
+def list
   db = PG.connect(dbname: "ls185")
   result = db.exec("SELECT * FROM expenses ORDER BY created_on;")
 
