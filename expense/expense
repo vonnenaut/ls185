@@ -9,8 +9,36 @@ class ExpenseData
 
   def list_expenses
     result = @db_connection.exec("SELECT * FROM expenses ORDER BY created_on;")
+    display_expenses(result)
+  end
 
-    result.each do |tuple|
+  def add_expense(amount, memo)
+    date = Date.today
+    sql = "INSERT INTO expenses (amount, memo, created_on) VALUES ($1, $2, $3);"
+    @db_connection.exec_params(sql, [amount, memo, date])
+  end
+
+  def search_expenses(term)
+    sql = "SELECT * FROM expenses WHERE memo ILIKE $1"
+    result = @db_connection.exec_params(sql, [term])
+    display_expenses(result)
+  end
+
+  def delete_expense(input_id)
+    sql = "SELECT * FROM expenses WHERE id = $1;"
+    number_included = @db_connection.exec_params(sql, [input_id])
+    if number_included.ntuples == 1
+      sql = "DELETE FROM expenses WHERE id=$1;"
+      @db_connection.exec_params(sql, [input_id])
+    else
+      abort "You must use a valid id number from the list."
+    end
+  end
+
+  private
+
+  def display_expenses(expenses)
+    expenses.each do |tuple|
       columns = [ tuple["id"].rjust(3),
                   tuple["created_on"].rjust(10),
                   tuple["amount"].rjust(12),
@@ -18,12 +46,6 @@ class ExpenseData
 
       puts columns.join(" | ")
     end
-  end
-
-  def add_expense(amount, memo)
-    date = Date.today
-    sql = "INSERT INTO expenses (amount, memo, created_on) VALUES ($1, $2, $3);"
-    @db_connection.exec_params(sql, [amount, memo, date])
   end
 end
 
@@ -43,6 +65,14 @@ class CLI
       memo = args[1]
       abort "You must provide an amount and memo." unless amount && memo
       @application.add_expense(amount, memo)
+    when "search"
+      term = args[0]
+      abort "You must provide a search term." unless term
+      @application.search_expenses(term)
+    when "delete"
+      input_id = args[0]
+      abort "You must provide a valid id number." unless input_id
+      @application.delete_expense(input_id)
     else
       display_help
     end
@@ -63,5 +93,4 @@ class CLI
   end
 end
 
-cli = CLI.new
-cli.run(ARGV)
+CLI.new.run(ARGV)
