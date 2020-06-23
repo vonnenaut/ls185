@@ -1,6 +1,7 @@
 #! /usr/bin/env ruby
 
 require 'pg'
+require 'io/console'
 
 class ExpenseData
   def initialize
@@ -9,7 +10,11 @@ class ExpenseData
 
   def list_expenses
     result = @db_connection.exec("SELECT * FROM expenses ORDER BY created_on;")
-    display_expenses(result)
+    sql = "SELECT SUM(amount) FROM expenses;"
+    total = @db_connection.exec(sql).values[0][0]
+
+    display_count(result)
+    display_expenses(result) if result.ntuples > 0
   end
 
   def add_expense(amount, memo)
@@ -20,8 +25,9 @@ class ExpenseData
 
   def search_expenses(term)
     sql = "SELECT * FROM expenses WHERE memo ILIKE $1"
-    result = @db_connection.exec_params(sql, [term])
-    display_expenses(result)
+    result = @db_connection.exec_params(sql, ["%#{term}%"])
+    display_count(result)
+    display_expenses(result) if result.ntuples > 0
   end
 
   def delete_expense(input_id)
@@ -35,7 +41,22 @@ class ExpenseData
     end
   end
 
+  def delete_all_expenses
+    @db_connection.exec("DELETE FROM expenses;")
+    puts "All expenses have been deleted." 
+  end
+
   private
+
+  def display_count(expenses)
+    count = expenses.ntuples
+
+    if count == 0
+      puts "There are no expenses."
+    else
+      puts "There #{count > 1 ? "are" : "is"} #{count} expense#{"s" if count > 1}."
+    end
+  end
 
   def display_expenses(expenses)
     expenses.each do |tuple|
@@ -73,6 +94,10 @@ class CLI
       input_id = args[0]
       abort "You must provide a valid id number." unless input_id
       @application.delete_expense(input_id)
+    when "clear"
+      puts "This will remove all expenses.  Are you sure? (y/n)"
+      response = $stdin.getch
+      @application.delete_all_expenses if response == "y"
     else
       display_help
     end
