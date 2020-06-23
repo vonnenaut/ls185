@@ -67,6 +67,10 @@ class ExpenseData
 
       puts columns.join(" | ")
     end
+    
+    total = @db_connection.exec("SELECT SUM(amount) FROM expenses;").values[0][0]
+    puts "------------------------------------"
+    puts "Total\t\t\t  #{total}"
   end
 end
 
