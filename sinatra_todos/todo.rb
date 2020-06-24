@@ -91,9 +91,7 @@ class SessionPersistence
 
   def mark_all_todos_as_completed(list_id)
     list = find_list(list_id)
-    list[:todos].each do |todo|
-      todo[:completed] = true
-    end
+    list[:todos].each { |todo| todo[:completed] = true }
   end
 
   private
