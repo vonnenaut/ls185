@@ -1,6 +1,5 @@
 # todo.rb
 require "sinatra"
-require "sinatra/reloader"
 require "sinatra/content_for"
 require "tilt/erubis"
 
@@ -10,6 +9,12 @@ configure do
   enable :sessions
   set :session_secret, "secret"
   set :erb, escape_html: true
+end
+
+configure(:development) do
+  require "sinatra/reloader"
+  # tells sinatra/reloader to also reload helper file upon changes being saved to file
+  also_reload "database_persistence"
 end
 
 helpers do
@@ -22,7 +27,6 @@ helpers do
   end
 
   def todos_count(list)
-    # binding.pry
     list[:todos].size
   end
 
