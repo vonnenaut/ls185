@@ -1,10 +1,11 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    backports (3.17.1)
+    backports (3.18.1)
     erubis (2.7.0)
     multi_json (1.14.1)
     nio4r (2.5.2)
+    pg (1.2.3)
     puma (4.3.5)
       nio4r (~> 2.0)
     rack (1.6.13)
@@ -30,14 +31,13 @@ PLATFORMS
 
 DEPENDENCIES
   erubis
+  pg
   puma (= 4.3.5)
-  rack (>= 1.6.12)
-  rack-protection (>= 1.5.5)
   sinatra (~> 1.4.7)
   sinatra-contrib
 
 RUBY VERSION
-   ruby 2.5.1p57
+   ruby 2.5.3p105
 
 BUNDLED WITH
-   1.17.3
+   2.1.4
